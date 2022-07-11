@@ -1,0 +1,21 @@
+const express = require('express');
+const router = express.Router();
+const flash = require('connect-flash');
+const passport = require('passport');
+const multer=require('multer');
+const {storage}=require('../cloudinary');
+const upload=multer({storage});
+const catchAsync = require('../utils/catchAsync');
+const Campground = require('../models/campground');
+const { campgroundSchema, reviewSchema } = require('../schemas.js');
+const { isLoggedIn, isAuthor, validateCampground } = require('../middleware');
+const campgrounds = require('../controllers/campgrounds');
+
+router.get('/', catchAsync(campgrounds.index));
+router.get('/new', isLoggedIn, catchAsync(campgrounds.renderCreateCampground));
+router.post('/', isLoggedIn, upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground));
+router.get('/:id', catchAsync(campgrounds.showCampground));
+router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditCampground));
+router.put('/:id', isLoggedIn, isAuthor, upload.array('image'), validateCampground, catchAsync(campgrounds.editCampground));
+router.delete('/:id', isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
+module.exports = router; 
